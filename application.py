@@ -14,6 +14,7 @@ class App:
     def dispatch(self, request):
         adapter = self.url_map.bind_to_environ(request.environ)
         func, kwargs = adapter.match(path_info=request.path, method=request.method)
+        request.query_params = request.args
         request.path_params = kwargs
         return func(request)
 
