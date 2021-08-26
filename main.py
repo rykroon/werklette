@@ -1,6 +1,6 @@
 from werkzeug.wrappers import Response
 
-from app import App
+from application import App
 
 app = App()
 

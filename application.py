@@ -9,9 +9,13 @@ class App:
 
     @Request.application
     def __call__(self, request):
+        return self.dispatch(request)
+
+    def dispatch(self, request):
         adapter = self.url_map.bind_to_environ(request.environ)
         func, kwargs = adapter.match(path_info=request.path, method=request.method)
-        return func(request, **kwargs)
+        request.path_params = kwargs
+        return func(request)
 
     def route(self, url, methods=None):
         def decorator(func):
