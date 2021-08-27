@@ -1,15 +1,11 @@
-from werkzeug.wrappers import Response
+from werklette import Werklette
+from werklette.responses import JsonResponse
 
-from application import App
 
-app = App()
+app = Werklette()
 
 
 @app.get('/')
 def homepage(request):
-    return Response('Hello World', content_type='plain/text')
-
-
-
-
+    return JsonResponse({'Hello': 'World'})
 
