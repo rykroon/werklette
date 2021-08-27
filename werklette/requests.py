@@ -1,7 +1,7 @@
-from werkzeug.wrappers import WerkRequest
+from werkzeug.wrappers import Request as WerkzeugRequest
 
 
-class Request(WerkRequest):
+class Request(WerkzeugRequest):
 
     @property
     def query_params(self):
@@ -9,3 +9,8 @@ class Request(WerkRequest):
             Alias for for request.args
         """
         return self.args
+
+    @property
+    def path_params(self):
+        return getattr(self, '_path_params', {})
+

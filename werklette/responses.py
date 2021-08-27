@@ -1,5 +1,9 @@
 import json
-from werkzeug.wrappers import Response
+from werkzeug.wrappers import Response as WerkzeugResponse
+
+
+class Response(WerkzeugResponse):
+    ...
 
 
 class JsonResponse(Response):
