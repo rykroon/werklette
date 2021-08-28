@@ -30,15 +30,38 @@ class RoutingMiddleware:
 
 class ExceptionMiddleware:
 
-    def __init__(self, app):
+    def __init__(self, app, handlers: dict = {}):
         self.app = app
+        # By default, there is an HTTPException handler that just returns 
+        # the Exception. 
+        self.handlers = {
+            HTTPException: lambda req, exc: exc
+        }
+        self.handlers.update(handlers)
 
     def __call__(self, request):
         try:
             return self.app(request)
         
-        except HTTPException as e:
-            return e
+        except Exception as e:
+            handler = None
+
+            if isinstance(e, HTTPException):
+                handler = self.handlers.get(e.code)
+            
+            if handler is None:
+                handler = self.lookup_handler(e)
+
+            if handler:
+                return handler(request, e)
+                
+            raise e
+
+    def lookup_handler(self, exc):
+        for cls in type(exc).__mro__:
+            if cls in self.handlers:
+                return cls
+        return None
 
 
 class ServerErrorMiddleware:
