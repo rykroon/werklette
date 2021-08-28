@@ -1,6 +1,6 @@
 from werklette.routing import Router, Route
 from werklette.requests import Request
-from werklette.middleware import ExceptionMiddleware
+from werklette.middleware import ExceptionMiddleware, RoutingMiddleware
 
 
 class Werklette:
@@ -10,7 +10,7 @@ class Werklette:
 
     def __call__(self, environ, start_response):
         request = Request(environ)
-        app = self.router
+        app = RoutingMiddleware(self.router)
         app = ExceptionMiddleware(app)
         response = app(request)
         return response(environ, start_response)

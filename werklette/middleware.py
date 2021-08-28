@@ -11,6 +11,21 @@ class Middleware:
         ...
 
 
+class RoutingMiddleware:
+    """
+        Converts a Router into Middleware.
+    """
+
+    def __init__(self, router):
+        self.router = router
+
+    def __call__(self, request):
+        adapter = self.router.bind_to_environ(request.environ)
+        func, kwargs = adapter.match(path_info=request.path, method=request.method)
+        request.set_path_params(kwargs)
+        return func(request)
+
+
 class ExceptionMiddleware:
 
     def __init__(self, app):
