@@ -1,10 +1,11 @@
 from werklette.routing import Router, Route
 from werklette.requests import Request
-from werklette.middleware import ExceptionMiddleware, RoutingMiddleware
+from werklette.middleware import ExceptionMiddleware, RoutingMiddleware, ServerErrorMiddleware
 
 
 class Werklette:
-    def __init__(self, routes=None, middleware=None):
+    def __init__(self, debug=False, routes=None, middleware=None):
+        self.debug = debug
         self.middleware = middleware
         self.router = Router(routes)
 
@@ -12,6 +13,7 @@ class Werklette:
         request = Request(environ)
         app = RoutingMiddleware(self.router)
         app = ExceptionMiddleware(app)
+        app = ServerErrorMiddleware(app, debug=self.debug)
         response = app(request)
         return response(environ, start_response)
 

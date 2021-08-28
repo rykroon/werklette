@@ -3,7 +3,7 @@ from werklette.responses import JsonResponse
 from werklette.routing import Router, Route
 
 
-app = Werklette()
+app = Werklette(debug=True)
 
 
 @app.get('/')
