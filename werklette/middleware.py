@@ -5,14 +5,14 @@ from werklette.responses import Response
 
 class ExceptionMiddleware:
 
-    def __init__(self, app, handlers: dict = {}):
+    def __init__(self, app, handlers: dict = {}, debug=False):
         self.app = app
-        # By default, there is an HTTPException handler that just returns 
-        # the Exception. 
         self.handlers = {
-            HTTPException: lambda req, exc: exc
+            HTTPException: lambda req, exc: exc,
+            Exception: self.server_error_handler
         }
         self.handlers.update(handlers)
+        self.debug = debug
 
     def __call__(self, environ, start_response):
         try:
@@ -36,29 +36,13 @@ class ExceptionMiddleware:
     def lookup_handler(self, exc):
         for cls in type(exc).__mro__:
             if cls in self.handlers:
-                return cls
+                return self.handlers[cls]
         return None
 
+    def server_error_handler(self, request, e):
+        if self.debug:
+            description = "".join(traceback.format_exception(type(e), e, e.__traceback__))
+            return InternalServerError(description=description)
 
-class ServerErrorMiddleware:
-
-    def __init__(self, app, handler=None, debug=False):
-        self.app = app
-        self.handler = handler
-        self.debug = debug
-
-    def __call__(self, environ, start_response):
-        try:
-            return self.app(environ, start_response)
-
-        except Exception as e:
-            if self.debug:
-                content = traceback.format_exception(type(e), e, e.__traceback__)
-                return Response(content, status=500)
-
-            if self.handler:
-                request = environ.get('werkzeug.request')
-                return self.handler(request)
-
-            return InternalServerError(original_exception=e)
+        return InternalServerError(original_exception=e)
 
