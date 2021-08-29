@@ -1,6 +1,7 @@
 import traceback
 from werkzeug.exceptions import HTTPException, InternalServerError
 from werklette.responses import Response
+from werklette.requests import Request
 
 
 class Middleware:
@@ -39,9 +40,9 @@ class ExceptionMiddleware:
         }
         self.handlers.update(handlers)
 
-    def __call__(self, request):
+    def __call__(self, environ, start_response):
         try:
-            return self.app(request)
+            return self.app(environ, start_response)
         
         except Exception as e:
             handler = None
@@ -53,6 +54,7 @@ class ExceptionMiddleware:
                 handler = self.lookup_handler(e)
 
             if handler:
+                request = environ.get('werkzeug.request')
                 return handler(request, e)
                 
             raise e
@@ -65,14 +67,15 @@ class ExceptionMiddleware:
 
 
 class ServerErrorMiddleware:
+
     def __init__(self, app, handler=None, debug=False):
         self.app = app
         self.handler = handler
         self.debug = debug
 
-    def __call__(self, request):
+    def __call__(self, environ, start_response):
         try:
-            return self.app(request)
+            return self.app(environ, start_response)
 
         except Exception as e:
             if self.debug:
@@ -80,6 +83,7 @@ class ServerErrorMiddleware:
                 return Response(content, status=500)
 
             if self.handler:
+                request = environ.get('werkzeug.request')
                 return self.handler(request)
 
             return InternalServerError(original_exception=e)
