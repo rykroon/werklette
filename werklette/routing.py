@@ -8,7 +8,7 @@ class Router(Map):
         request = environ.get('werkzeug.request') or Request(environ)
         adapter = self.bind_to_environ(request.environ)
         endpoint, kwargs = adapter.match(path_info=request.path, method=request.method)
-        request.set_path_params(kwargs)
+        request._set_path_params(kwargs)
         return endpoint(request)
 
 

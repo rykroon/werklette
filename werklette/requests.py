@@ -15,6 +15,6 @@ class Request(WerkzeugRequest):
     def path_params(self):
         return getattr(self, '_path_params', ImmutableDict())
 
-    def set_path_params(self, params):
+    def _set_path_params(self, params):
         self._path_params = ImmutableDict(params)
 
